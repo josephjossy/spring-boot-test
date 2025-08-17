@@ -1,22 +1,15 @@
-# Use Gradle to build the app
-FROM gradle:8.7-jdk17 AS builder
-WORKDIR /app
+FROM ubuntu:latest AS build
 
-# Copy project files
+RUN apt-get update
+RUN apt-get install openjdk-17-jdk -y
 COPY . .
 
-# Build the application without tests (to speed up CI/CD)
-RUN ./gradlew build -x test
+RUN ./gradlew bootJar --no-daemon
 
-# Use a lightweight JDK image to run the app
-FROM eclipse-temurin:17-jdk-jammy
-WORKDIR /app
+FROM openjdk:17-jdk-slim
 
-# Copy only the built jar from the builder stage
-COPY --from=builder /app/build/libs/*.jar book.jar
-
-# Expose port
 EXPOSE 8080
 
-# Run the application
+COPY --from=build /build/libs/*.jar app.jar
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
