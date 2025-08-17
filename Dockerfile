@@ -1,22 +1,29 @@
-# Use Gradle to build the app
+# ---- Build Stage ----
 FROM gradle:8.7-jdk17 AS builder
 WORKDIR /app
 
-# Copy project files
+# Copy Gradle build files first (for better caching of dependencies)
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gradle ./gradle
+
+# Download dependencies (helps cache Gradle deps between builds)
+RUN gradle dependencies || return 0
+
+# Copy the rest of the project
 COPY . .
 
-# Build the application without tests (to speed up CI/CD)
-RUN ./gradlew build -x test
+# Build the application without running tests
+RUN ./gradlew clean build -x test
 
-# Use a lightweight JDK image to run the app
+# ---- Run Stage ----
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
-# Copy only the built jar from the builder stage
+# Copy only the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose port
+# Expose Spring Boot default port
 EXPOSE 8080
 
-# Run the application
+# Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
