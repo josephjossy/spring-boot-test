@@ -11,8 +11,12 @@ val kotlin_version = "1.9.24"
 val kotlinx_version = "1.8.0"
 
 group = "com.book"
-java.sourceCompatibility = JavaVersion.VERSION_18
-java.targetCompatibility = JavaVersion.VERSION_18
+
+// ✅ Compile & run against Java 17 (Render safe)
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 application {
     mainClass.set("com.book.ApplicationKt")
@@ -20,7 +24,7 @@ application {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "18"
+        jvmTarget = "17"
     }
 }
 
