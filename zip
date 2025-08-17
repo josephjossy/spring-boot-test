@@ -1,0 +1,4 @@
+#!/bin/bash
+
+zip -r book.zip zip books.sql build.gradle.kts src
+
